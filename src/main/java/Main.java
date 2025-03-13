@@ -13,7 +13,7 @@ public class Main {
     String inputLine = scanner.nextLine();
 
     // You can use print statements as follows for debugging, they'll be visible when running tests.
-    System.err.println("Logs from your program will appear here!");
+    System.err.println("Logs from your program will appear here! :) ");
 
 
      if (matchPattern(inputLine, pattern)) {
@@ -24,8 +24,14 @@ public class Main {
   }
 
   public static boolean matchPattern(String inputLine, String pattern) {
-    if (pattern.length() == 1) {
-      return inputLine.contains(pattern);
+    if (pattern.equals("\\d")) {
+        for(int i = 0 ; i < inputLine.length() ; i++){
+            char character = inputLine.charAt(i);
+            if(Character.isDigit(character)){
+                return true ;
+            }
+        }
+        return false ;
     } else {
       throw new RuntimeException("Unhandled pattern: " + pattern);
     }
