@@ -32,6 +32,9 @@ public class Main {
             }
         }
         return false ;
+    } else if (pattern.length() == 1) {
+        return inputLine.contains(pattern) ;
+
     } else {
       throw new RuntimeException("Unhandled pattern: " + pattern);
     }
