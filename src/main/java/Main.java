@@ -55,7 +55,18 @@ public class Main {
         return inputLine.matches(".*\\w.*");
 
     //  for the positive character group
-    } else if (pattern.startsWith("[") && pattern.endsWith("]")) {
+    }else if (pattern.startsWith("[^") && pattern.endsWith("]")) {
+        String subStr2 = pattern.substring(2, pattern.length() - 1);
+        for (int i = 0; i < inputLine.length(); i++) {
+            char character2 = inputLine.charAt(i);
+            if (subStr2.indexOf(character2) == -1) {
+                return true;
+            }
+        }
+        return false;
+
+
+    }else if (pattern.startsWith("[") && pattern.endsWith("]")) {
          String subStr = pattern.substring(1, pattern.length() -1) ;
          for(int i = 0 ; i < inputLine.length() ; i++){
              char character = inputLine.charAt(i);
@@ -66,20 +77,12 @@ public class Main {
          return false ;
 
       //  for the negative character group ==> so i can just reverse the logic
-  } else if (pattern.startsWith("[^") && pattern.endsWith("]")) {
-        String subStr = pattern.substring(2, pattern.length() -1) ;
-        for(int i = 0 ; i < inputLine.length() ; i++){
-            char character = inputLine.charAt(i);
-            if(subStr.indexOf(character) == -1){
-                return true ;
-            }
-        }
-        return false ;
-  } else if (pattern.length() == 1) {
+
+    } else if (pattern.length() == 1) {
         return inputLine.contains(pattern) ;
 
-  } else {
+    } else {
       throw new RuntimeException("Unhandled pattern: " + pattern);
-  }
+    }
   }
 }
