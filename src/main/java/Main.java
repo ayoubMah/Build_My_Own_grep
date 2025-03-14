@@ -24,6 +24,8 @@ public class Main {
   }
 
   public static boolean matchPattern(String inputLine, String pattern) {
+
+    // for the digit class
     if (pattern.equals("\\d")) {
         for(int i = 0 ; i < inputLine.length() ; i++){
             char character = inputLine.charAt(i);
@@ -32,7 +34,13 @@ public class Main {
             }
         }
         return false ;
-    } else if (pattern.length() == 1) {
+
+    // for the character class so i guess i can do it with regular expression
+    } else if ("\\w".equals(pattern)) {
+        return inputLine.matches(".*\\w.*");
+    }
+
+    else if (pattern.length() == 1) {
         return inputLine.contains(pattern) ;
 
     } else {
