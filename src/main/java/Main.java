@@ -65,11 +65,21 @@ public class Main {
          }
          return false ;
 
-    } else if (pattern.length() == 1) {
+      //  for the negative character group ==> so i can just reverse the logic
+  } else if (pattern.startsWith("[^") && pattern.endsWith("]")) {
+        String subStr = pattern.substring(2, pattern.length() -1) ;
+        for(int i = 0 ; i < inputLine.length() ; i++){
+            char character = inputLine.charAt(i);
+            if(subStr.indexOf(character) == -1){
+                return true ;
+            }
+        }
+        return false ;
+  } else if (pattern.length() == 1) {
         return inputLine.contains(pattern) ;
 
-    } else {
+  } else {
       throw new RuntimeException("Unhandled pattern: " + pattern);
-    }
+  }
   }
 }
