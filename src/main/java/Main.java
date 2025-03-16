@@ -22,90 +22,75 @@ public class Main {
         }
     }
 
+
     public static boolean matchPattern(String inputLine, String pattern) {
-
-        int patternIndex = 0;
-        int inputIndex = 0;
-
-        while (patternIndex < pattern.length() && inputIndex < inputLine.length()) {
-
-            char patternChar = pattern.charAt(patternIndex);
-
-            if (patternChar == '\\') { // if our pattern start with a backslash \
-                // handle special character \d  \w ...
-                patternIndex++;
-                if (patternIndex < pattern.length()) {
-                    char nextPatternChar = pattern.charAt(patternIndex);
-                    if (nextPatternChar == 'd') {
-                        if (Character.isDigit(inputLine.charAt(inputIndex))) {
-                            inputIndex ++ ;
-                        }
-                        else {
-                            return false ;
-                        }
-                    } else if (nextPatternChar == 'w') {
-                        if (Character.isDigit(inputLine.charAt(inputIndex))){
-                            inputIndex ++ ;
-                        }
-                        else {
-                            return false ;
-                        }
-                    }else {
-                        throw new RuntimeException("Unhandled escape sequence: \\" + nextPatternChar);
-                    }
-                }else{
-                    return false ;
-                }
-            } else if (patternChar == '[') {
-                int closingBracketIndex = pattern.indexOf(']', patternIndex + 1);
-                if (closingBracketIndex == -1) {
-                    throw new RuntimeException("Unterminated character group");
-                }
-
-                String group = pattern.substring(patternIndex + 1 , closingBracketIndex) ;
-                boolean negate = false ;
-                if(group.startsWith("^")){
-                    negate = true ;
-                    group = group.substring(1);
-                }
-
-                boolean matchFound = false ;
-                if (negate) {
-                    if (group.indexOf(inputLine.charAt(inputIndex)) == -1){
-                        matchFound =  true;
-                    }
-                }else {
-                    if (group.indexOf(inputLine.charAt(inputIndex)) != -1){
-                        matchFound = true;
-                    }
-                }
-
-                if (matchFound){
-                    inputIndex ++ ;
-                }
-                else {
-                    return false ;
-                }
-
-                patternIndex = closingBracketIndex ;
-            }
-            else {
-                if (patternChar == inputLine.charAt(inputIndex)){
-                    inputIndex ++ ;
-                }
-                else {
-                    return false ;
+        if (pattern.length() == 1) {
+            return inputLine.contains(pattern);
+        } else {
+            for (int i = 0; i < inputLine.length(); i++) {
+                if (matchPattern(inputLine, pattern, i)) {
+                    return true;
                 }
             }
-
-            patternIndex ++ ;
         }
-
-        if (patternIndex != pattern.length() || inputIndex != inputLine.length()){
-            return false ;
+        return false;
+    }
+    private static boolean checkDigit(String inputLine, int index) {
+        return inputLine.charAt(index) > '0' && inputLine.charAt(index) < '9';
+    }
+    private static boolean checkAlphaNumeric(String inputLine, int index) {
+        return Character.isLetterOrDigit(inputLine.charAt(index));
+    }
+    private static boolean checkPositiveChar(String inputLine, int index,
+                                             String charGroup) {
+        return charGroup.contains(inputLine.substring(index, index + 1));
+    }
+    private static boolean checkNegativeChar(String inputLine, int index,
+                                             String charGroup) {
+        return !charGroup.contains(inputLine.substring(index, index + 1));
+    }
+    public static boolean matchPattern(String inputLine, String pattern,
+                                       int index) {
+        int inputLinePtr = index, patternPtr = 0;
+        while (inputLinePtr < inputLine.length()) {
+            boolean matched = false;
+            String patternRegex = getRegex(pattern, patternPtr);
+            patternPtr += patternRegex.length();
+            if (patternRegex.equals("\\d")) {
+                matched = checkDigit(inputLine, inputLinePtr);
+            } else if (patternRegex.equals("\\w")) {
+                matched = checkAlphaNumeric(inputLine, inputLinePtr);
+            } else if (patternRegex.contains("[^") && patternRegex.contains("]")) {
+                matched = checkNegativeChar(
+                        inputLine, inputLinePtr,
+                        patternRegex.substring(2, patternRegex.length() - 1));
+            } else if (patternRegex.contains("[") && patternRegex.contains("]")) {
+                matched = checkPositiveChar(
+                        inputLine, inputLinePtr,
+                        patternRegex.substring(1, patternRegex.length() - 1));
+            } else if (patternRegex.length() == 1) {
+                matched = inputLine.charAt(inputLinePtr) == patternRegex.charAt(0);
+            } else {
+                throw new RuntimeException("Unhandled pattern: " + pattern);
+            }
+            if (!matched) {
+                return false;
+            }
+            if (patternPtr == pattern.length()) {
+                return true;
+            }
+            inputLinePtr++;
         }
-
-        return true ;
-
+        return false;
+    }
+    private static String getRegex(String pattern, int index) {
+        if (pattern.charAt(index) == '\\' && index < pattern.length() - 1) {
+            return pattern.substring(index, index + 2);
+        } else if (pattern.charAt(index) == '[' && index < pattern.length() - 2) {
+            return pattern.substring(index, pattern.indexOf("]", index) + 1);
+        } else {
+            return pattern.substring(index, index + 1);
+        }
     }
 }
+
