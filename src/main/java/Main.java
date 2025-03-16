@@ -35,53 +35,77 @@ public class Main {
                 // handle special character \d  \w ...
                 patternIndex++;
                 if (patternIndex < pattern.length()) {
-                    char nextPattern = pattern.charAt(patternIndex);
-                    if (nextPattern == 'd') {
-                        return inputLine.matches(".*\\d.*");
-                    } else if (nextPattern == 'w') {
-                        return inputLine.matches(".*\\w.*");
+                    char nextPatternChar = pattern.charAt(patternIndex);
+                    if (nextPatternChar == 'd') {
+                        if (Character.isDigit(inputLine.charAt(inputIndex))) {
+                            inputIndex ++ ;
+                        }
+                        else {
+                            return false ;
+                        }
+                    } else if (nextPatternChar == 'w') {
+                        if (Character.isDigit(inputLine.charAt(inputIndex))){
+                            inputIndex ++ ;
+                        }
+                        else {
+                            return false ;
+                        }
+                    }else {
+                        throw new RuntimeException("Unhandled escape sequence: \\" + nextPatternChar);
                     }
+                }else{
+                    return false ;
                 }
             } else if (patternChar == '[') {
-                // handle special characters groups, positive and negative
-                patternIndex++;
-
-                if (patternIndex < pattern.length()) {
-                    char nextChar = pattern.charAt(inputIndex);
-                    if (nextChar == '^') {
-                        String subString = pattern.substring(2, (pattern.length() - 1));
-                        for (int i = 0; i < inputLine.length(); i++) {
-                            char character = inputLine.charAt(i);
-                            if (subString.indexOf(character) == -1) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    } else {
-                        String subStr = pattern.substring(1, pattern.length() - 1);
-                        for (int i = 0; i < inputLine.length(); i++) {
-                            char character = inputLine.charAt(i);
-                            if (subStr.indexOf(character) != -1) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-
+                int closingBracketIndex = pattern.indexOf(']', patternIndex + 1);
+                if (closingBracketIndex == -1) {
+                    throw new RuntimeException("Unterminated character group");
                 }
-            } else if (pattern.length() == 1) {
-                return inputLine.contains(pattern);
 
-            } else {
-                throw new RuntimeException("Unhandled pattern: " + pattern);
+                String group = pattern.substring(patternIndex + 1 , closingBracketIndex) ;
+                boolean negate = false ;
+                if(group.startsWith("^")){
+                    negate = true ;
+                    group = group.substring(1);
+                }
+
+                boolean matchFound = false ;
+                if (negate) {
+                    if (group.indexOf(inputLine.charAt(inputIndex)) == -1){
+                        matchFound =  true;
+                    }
+                }else {
+                    if (group.indexOf(inputLine.charAt(inputIndex)) != -1){
+                        matchFound = true;
+                    }
+                }
+
+                if (matchFound){
+                    inputIndex ++ ;
+                }
+                else {
+                    return false ;
+                }
+
+                patternIndex = closingBracketIndex ;
+            }
+            else {
+                if (patternChar == inputLine.charAt(inputIndex)){
+                    inputIndex ++ ;
+                }
+                else {
+                    return false ;
+                }
             }
 
-
-            patternIndex++;
+            patternIndex ++ ;
         }
 
-        return patternIndex == pattern.length() && inputIndex == inputLine.length();
+        if (patternIndex != pattern.length() || inputIndex != inputLine.length()){
+            return false ;
+        }
 
+        return true ;
 
     }
 }
